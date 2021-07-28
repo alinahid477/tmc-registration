@@ -1,0 +1,13 @@
+.env
+*.nogit*
+.bash_history
+*.crt
+
+
+.kube/*
+!.kube/.gitkeep
+.ssh/*
+!.ssh/.gitkeep
+binaries/*
+!binaries/.gitkeep
+!binaries/tmcrego.sh
