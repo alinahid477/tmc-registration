@@ -15,12 +15,13 @@ Docker-ce installed on host computer.
 
 **.env**
 Rename the .env.sample to .env file (`mv .env.sample .env`) and fill the below values
+
 - TKG_SUPERVISOR_ENDPOINT=*<host name or ip endpoint of TKG supervisor cluster>*
-BASTION_HOST=*<the ip or hostname of the bastion host to get to the supervisor cluster. IF no bastion is needed leave it blank>*
-BASTION_USERNAME=*<username for the bastion. IF no bastion is needed leave it blank>*
-KUBECTL_VSPHERE_PASSWORD=*<password for administrator@vsphere.local>*
-TMC_REGISTRATION_LINK=*<the URL obtained from TMC>*
-COMPLETE=*<REMOVE THIS. After completing registration the script will auto add and populate this.>*
+- BASTION_HOST=*<the ip or hostname of the bastion host to get to the supervisor cluster. IF no bastion is needed leave it blank>*
+- BASTION_USERNAME=*<username for the bastion. IF no bastion is needed leave it blank>*
+- TKG_VSPHERE_CLUSTER_USERNAME=*<username of vpshere user that has access>*
+- TKG_VSPHERE_CLUSTER_PASSWORD=*<password for administrator@vsphere.local>*
+- TMC_REGISTRATION_LINK=*<the URL obtained from TMC>*
 
 
 ## Install and Run

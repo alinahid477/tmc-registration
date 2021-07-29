@@ -1,5 +1,6 @@
 #!/bin/bash
 export $(cat /root/.env | xargs)
+export KUBECTL_VSPHERE_PASSWORD=$TKG_VSPHERE_CLUSTER_PASSWORD
 printf "\n\n\n***********Starting TMC Registration on $TKG_SUPERVISOR_ENDPOINT ...*************\n"
 
 if [ -z "$BASTION_HOST" ]
@@ -7,7 +8,7 @@ then
     printf "\n\n\n***********Login into Supervisor cluster...*************\n"
     rm /root/.kube/config
     rm -R /root/.kube/cache
-    kubectl vsphere login --insecure-skip-tls-verify --server $TKG_SUPERVISOR_ENDPOINT --vsphere-username administrator@vsphere.local
+    kubectl vsphere login --insecure-skip-tls-verify --server $TKG_SUPERVISOR_ENDPOINT --vsphere-username $TKG_VSPHERE_CLUSTER_USERNAME
     kubectl config use-context $TKG_SUPERVISOR_ENDPOINT
 else
     printf "\n\n\n***********Creating Tunnel through bastion $BASTION_USERNAME@$BASTION_HOST ...*************\n"
@@ -50,7 +51,7 @@ then
 
     printf "\nCOMPLETE=YES" >> /root/.env
 else
-    printf "\n\n\nTMC Registration is already marked as complete. (Please change COMPLETE=\"\" in the .env for new registration)\n"
+    printf "\n\n\nTMC Registration is already marked as complete. (If this is not desired please change COMPLETE=\"\" or remove COMPLETE in the .env for new registration)\n"
     printf "\n\n\nGoing straight to shell access.\n"
 fi
 
