@@ -1,6 +1,6 @@
 #!/bin/bash
 export $(cat /root/.env | xargs)
-export KUBECTL_VSPHERE_PASSWORD=$TKG_VSPHERE_CLUSTER_PASSWORD
+export KUBECTL_VSPHERE_PASSWORD=$(echo $TKG_VSPHERE_CLUSTER_PASSWORD | xargs)
 printf "\n\n\n***********Starting TMC Registration on $TKG_SUPERVISOR_ENDPOINT ...*************\n"
 
 if [ -z "$BASTION_HOST" ]

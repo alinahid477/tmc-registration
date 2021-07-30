@@ -32,33 +32,33 @@ The build will build the docker container with all necessary dependancies.
 The run will execute series of commands to process tmc registration. After the it finishes it will give shell access.
 
 
-## That's it.
+# That's it.
 
 
 
 ## Essentially the below process is automated in this docker
 
-### SSH into bastion (in the case when running in pvt cloud)
+**SSH into bastion (in the case when running in pvt cloud)**
 `ssh -i .ssh/id_rsa ubuntu@10.79.142.40`
 
 
-### login into tkg supervisor cluster (in bastion)
+**login into tkg supervisor cluster (in bastion)**
 ```
 kubectl vsphere login --insecure-skip-tls-verify --server 192.168.220.2 --vsphere-username administrator@vsphere.local
 kubectl config use-context 192.168.220.2
 ```
-### grab the tmc namespace name (begins with svc-tmc; in bastion)
+**grab the tmc namespace name (begins with svc-tmc; in bastion)**
 `kubectl get ns | grep svc-tmc`
 
-### modify tmc-registration.yaml (in local machine/laptop)
+**modify tmc-registration.yaml (in local machine/laptop)**
 - with the svc-tmc-c1006 (or whichever the number is) 
 - and the registration url from TMC console.
 
-### copy the tmc-registration.yaml to the bastion for deployment
+**copy the tmc-registration.yaml to the bastion for deployment**
 `scp -i .ssh/id_rsa tmc-registration.yaml ubuntu@10.79.142.40:/home/ubuntu/ali/`
 
-### deploy tmc-registration.yaml (in bastion)
+**deploy tmc-registration.yaml (in bastion)**
 `kubectl create -f tmc-registration.yaml`
 
-### to see progress (in bastion)
+**to see progress (in bastion)**
 `kubectl -n svc-tmc-c1006 describe agentinstall tmc-agent-installer-config`
