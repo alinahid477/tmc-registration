@@ -17,6 +17,9 @@ RUN apt-get update && apt-get install -y \
 	&& curl -L https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl \
 	&& chmod +x /usr/local/bin/kubectl
 
+RUN curl -o /usr/local/bin/jq -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && \
+  	chmod +x /usr/local/bin/jq
+
 COPY .ssh/id_rsa /root/.ssh/
 # COPY .ssh/known_hosts /root/.ssh/
 RUN chmod 600 /root/.ssh/id_rsa
