@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
 	&& chmod +x /usr/local/bin/kubectl
 
 COPY .ssh/id_rsa /root/.ssh/
-COPY .ssh/known_hosts /root/.ssh/
+# COPY .ssh/known_hosts /root/.ssh/
 RUN chmod 600 /root/.ssh/id_rsa
 
 COPY binaries/tmcrego.sh /usr/local/
