@@ -8,8 +8,8 @@ fi
 
 if [[ -z $name ]]
 then
-    printf "\nAssuming default name is: tmcrego\n"
-    name='tmcrego'
+    printf "\nAssuming default name is: merlin-tmcrego\n"
+    name='merlin-tmcrego'
 fi
 
 isexists=$(docker images | grep "\<$name\>")
