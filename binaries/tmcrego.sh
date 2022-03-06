@@ -1,47 +1,65 @@
 #!/bin/bash
 export $(cat /root/.env | xargs)
-export KUBECTL_VSPHERE_PASSWORD=$(echo $TKG_VSPHERE_CLUSTER_PASSWORD | xargs)
-printf "\n\n\n***********Starting TMC Registration on $TKG_SUPERVISOR_ENDPOINT ...*************\n"
 
-EXISTING_JWT_EXP=$(awk '/users/{flag=1} flag && /'$TKG_VSPHERE_CLUSTER_ENDPOINT'/{flag2=1} flag2 && /token:/ {print $NF;exit}' /root/.kube/config | jq -R 'split(".") | .[1] | @base64d | fromjson | .exp')
-if [ -z "$EXISTING_JWT_EXP" ]
+if [[ -n $TKG_SUPERVISOR_ENDPOINT ]]
 then
-    EXISTING_JWT_EXP=$(date  --date="yesterday" +%s)
-fi
-CURRENT_DATE=$(date +%s)
+    export KUBECTL_VSPHERE_PASSWORD=$(echo $TKG_VSPHERE_CLUSTER_PASSWORD | xargs)
+    printf "\n\n\n***********Starting TMC Registration on $TKG_SUPERVISOR_ENDPOINT ...*************\n"
 
 
-if [ "$CURRENT_DATE" -gt "$EXISTING_JWT_EXP" ]
-then
-    if [ -z "$BASTION_HOST" ]
+    EXISTING_JWT_EXP=$(awk '/users/{flag=1} flag && /'$TKG_VSPHERE_CLUSTER_ENDPOINT'/{flag2=1} flag2 && /token:/ {print $NF;exit}' /root/.kube/config | jq -R 'split(".") | .[1] | @base64d | fromjson | .exp')
+    if [ -z "$EXISTING_JWT_EXP" ]
     then
-        printf "\n\n\n***********Login into Supervisor cluster...*************\n"
-        rm /root/.kube/config
-        rm -R /root/.kube/cache
-        kubectl vsphere login --insecure-skip-tls-verify --server $TKG_SUPERVISOR_ENDPOINT --vsphere-username $TKG_VSPHERE_CLUSTER_USERNAME
-        kubectl config use-context $TKG_SUPERVISOR_ENDPOINT
-    else
-        printf "\n\n\n***********Creating Tunnel through bastion $BASTION_USERNAME@$BASTION_HOST ...*************\n"
-        ssh-keyscan $BASTION_HOST > /root/.ssh/known_hosts
-        ssh -i /root/.ssh/id_rsa -4 -fNT -L 443:$TKG_SUPERVISOR_ENDPOINT:443 $BASTION_USERNAME@$BASTION_HOST
-        ssh -i /root/.ssh/id_rsa -4 -fNT -L 6443:$TKG_SUPERVISOR_ENDPOINT:6443 $BASTION_USERNAME@$BASTION_HOST
+        EXISTING_JWT_EXP=$(date  --date="yesterday" +%s)
+    fi
+    CURRENT_DATE=$(date +%s)
 
-        printf "\n\n\n***********Login into Supervisor cluster...*************\n"
-        rm /root/.kube/config
-        rm -R /root/.kube/cache
-        kubectl vsphere login --insecure-skip-tls-verify --server kubernetes --vsphere-username administrator@vsphere.local
-        sed -i 's/kubernetes/'$TKG_SUPERVISOR_ENDPOINT'/g' ~/.kube/config
-        kubectl config use-context $TKG_SUPERVISOR_ENDPOINT
-        sed -i '0,/'$TKG_SUPERVISOR_ENDPOINT'/s//kubernetes/' ~/.kube/config
+
+    if [ "$CURRENT_DATE" -gt "$EXISTING_JWT_EXP" ]
+    then
+        if [ -z "$BASTION_HOST" ]
+        then
+            printf "\n\n\n***********Login into Supervisor cluster...*************\n"
+            rm /root/.kube/config
+            rm -R /root/.kube/cache
+            kubectl vsphere login --insecure-skip-tls-verify --server $TKG_SUPERVISOR_ENDPOINT --vsphere-username $TKG_VSPHERE_CLUSTER_USERNAME
+            kubectl config use-context $TKG_SUPERVISOR_ENDPOINT
+        else
+            printf "\n\n\n***********Creating Tunnel through bastion $BASTION_USERNAME@$BASTION_HOST ...*************\n"
+            ssh-keyscan $BASTION_HOST > /root/.ssh/known_hosts
+            ssh -i /root/.ssh/id_rsa -4 -fNT -L 443:$TKG_SUPERVISOR_ENDPOINT:443 $BASTION_USERNAME@$BASTION_HOST
+            ssh -i /root/.ssh/id_rsa -4 -fNT -L 6443:$TKG_SUPERVISOR_ENDPOINT:6443 $BASTION_USERNAME@$BASTION_HOST
+
+            printf "\n\n\n***********Login into Supervisor cluster...*************\n"
+            rm /root/.kube/config
+            rm -R /root/.kube/cache
+            kubectl vsphere login --insecure-skip-tls-verify --server kubernetes --vsphere-username administrator@vsphere.local
+            sed -i 's/kubernetes/'$TKG_SUPERVISOR_ENDPOINT'/g' ~/.kube/config
+            kubectl config use-context $TKG_SUPERVISOR_ENDPOINT
+            sed -i '0,/'$TKG_SUPERVISOR_ENDPOINT'/s//kubernetes/' ~/.kube/config
+        fi
+    else
+        printf "\n\n\nCuurent kubeconfig has not expired. Using the existing one found at .kube/config\n"
+        if [ -n "$BASTION_HOST" ]
+        then
+            printf "\n\n\n***********Creating Tunnel through bastion $BASTION_USERNAME@$BASTION_HOST ...*************\n"
+            ssh -i /root/.ssh/id_rsa -4 -fNT -L 6443:$TKG_SUPERVISOR_ENDPOINT:6443 $BASTION_USERNAME@$BASTION_HOST
+        fi
     fi
 else
-    printf "\n\n\nCuurent kubeconfig has not expired. Using the existing one found at .kube/config\n"
-    if [ -n "$BASTION_HOST" ]
+    if [[ -n $TKG_MANAGEMENT_ENDPOINT ]]
     then
-        printf "\n\n\n***********Creating Tunnel through bastion $BASTION_USERNAME@$BASTION_HOST ...*************\n"
-        ssh -i /root/.ssh/id_rsa -4 -fNT -L 6443:$TKG_SUPERVISOR_ENDPOINT:6443 $BASTION_USERNAME@$BASTION_HOST
+        printf "\n\n\nManagement cluster endpoint provided. Using the existing kubeconfig found at .kube/config\n"
+        printf "\n\n\n***********Starting TMC Registration on $TKG_MANAGEMENT_ENDPOINT ...*************\n"
+        if [ -n "$BASTION_HOST" ]
+        then
+            printf "\n\n\n***********Creating Tunnel through bastion $BASTION_USERNAME@$BASTION_HOST ...*************\n"
+            ssh -i /root/.ssh/id_rsa -4 -fNT -L 6443:$TKG_MANAGEMENT_ENDPOINT:6443 $BASTION_USERNAME@$BASTION_HOST
+        fi  
     fi
 fi
+
+
 
 
 
