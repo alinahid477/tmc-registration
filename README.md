@@ -1,22 +1,42 @@
 # TMC Registration
 
+<img src="images/logo.png" alt="Merlin-TAP" width=200 height=210/>
+
+An easy "one click" way to complete TMC registration process.
+
+## Steps:
+- Get the TMC registration link generated from TMC
+- Fill in the appropriate (TKGs or TKGm) .env file as necessary
+- start this wizard using `start.sh` or `start.bat`
+
+## Reuse:
+*Reuse it for more times with different TMC registration link*
+- Fill out the details in .env file for new registration (eg: endpoint, registration url etc)
+- Remove `COMPLETE=YES` from .env file
+- Change kubeconfig file for TKGm
+
 
 ## Pre-Requisites
-Docker-ce installed on host computer.
+Docker ce / ee  installed on host computer.
 
 ## Preparation
 
-**.ssh**
+**.ssh (optional, only applicable when using bastion host with private cluster)**
 - Place the 'id_rsa' file for ssh login into bastion host
-- Create an empty file called 'known_hosts'
+
 
 **binaries**
-- for vsphere cluster place kubectl-vsphere in this directory
+- for vsphere with Tanzu (TKGS) cluster place kubectl-vsphere in this directory
+
+**kubeconfig file**
+- for TKGM clusters place the kubeconfig in .kube directory.
 
 **.env**
-Rename the .env.sample to .env file (`mv .env.sample .env`) and fill the below values
+Rename the .env.management.sample or .env.supervisor.sample to .env file (`mv .env.management.sample .env` or `mv .env.supervisor.sample .env`) and fill the below values
 
 - TKG_SUPERVISOR_ENDPOINT=*<host name or ip endpoint of TKG supervisor cluster>*
+OR
+- TKG_MANAGEMENT_ENDPOINT=*<host name or ip endpoint of TKG management cluster>*
 - BASTION_HOST=*<the ip or hostname of the bastion host to get to the supervisor cluster. IF no bastion is needed leave it blank>*
 - BASTION_USERNAME=*<username for the bastion. IF no bastion is needed leave it blank>*
 - TKG_VSPHERE_CLUSTER_USERNAME=*<username of vpshere user that has access>*
@@ -24,16 +44,20 @@ Rename the .env.sample to .env file (`mv .env.sample .env`) and fill the below v
 - TMC_REGISTRATION_LINK=*<the URL obtained from TMC>*
 
 
-## Install and Run
-docker build . -t tmcrego
-docker run -it --rm -v ${PWD}:/root/ --add-host kubernetes:127.0.0.1 --name tmcrego tmcrego /bin/bash
+## Start
+
+- `chmod +x start.sh`
+- `./start.sh` --> for linux/mac
+- `start.bat` --> For windows
 
 The build will build the docker container with all necessary dependancies.
 The run will execute series of commands to process tmc registration. After the it finishes it will give shell access.
 
 
 # That's it.
-
+- The container will start with all necessary dependencies
+- It will perform a series of automation that will complete regitration with TMC
+- After it finished it's job it will give access to the pompt of the container where you would be able to do kubectl to the connected k8s.
 
 
 ## Essentially the below process is automated in this docker
